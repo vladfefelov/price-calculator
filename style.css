@@ -69,8 +69,9 @@ th, td {
 
 #video-container {
     position: relative;
-    width: 100%;
+    width: 90%;
     max-width: 400px;
+    height: 250px;
     margin: auto;
     background: black;
     overflow: hidden;
@@ -78,7 +79,8 @@ th, td {
 
 video {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
 }
 
 .scan-box {

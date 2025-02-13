@@ -52,10 +52,6 @@
             border: none;
             border-radius: 5px;
             color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
             margin: 5px;
             width: 90%;
         }
@@ -87,10 +83,6 @@
         #resultTable {
             margin-top: 20px;
         }
-        .icon {
-            width: 20px;
-            height: 20px;
-        }
     </style>
 </head>
 <body>
@@ -99,24 +91,17 @@
         <h2>Калькулятор цены за килограмм</h2>
 
         <div class="input-group">
-            <input type="number" id="price" placeholder="Введите цену" oninput="validateInput(this)">
+            <input type="number" id="price" placeholder="Цена в тенге" oninput="validateInput(this)">
             <span>тг</span>
         </div>
 
         <div class="input-group">
-            <input type="number" id="weight" placeholder="Введите вес" oninput="validateInput(this)">
+            <input type="number" id="weight" placeholder="Вес в граммах" oninput="validateInput(this)">
             <span>г</span>
         </div>
 
-        <button class="btn btn-blue" onclick="calculate()">
-            <img class="icon" src="https://cdn-icons-png.flaticon.com/512/1053/1053209.png" alt="Калькулятор"> 
-            Посчитать
-        </button>
-
-        <button class="btn btn-red" onclick="resetTable()">
-            <img class="icon" src="https://cdn-icons-png.flaticon.com/512/1828/1828778.png" alt="Корзина">
-            Сбросить
-        </button>
+        <button class="btn btn-blue" onclick="calculate()">Посчитать</button>
+        <button class="btn btn-red" onclick="resetTable()">Сбросить</button>
 
         <table id="resultTable">
             <thead>
@@ -159,10 +144,6 @@
         function resetTable() {
             document.getElementById("resultBody").innerHTML = "";
             itemCount = 0;
-        }
-
-        function validateInput(input) {
-            input.value = input.value.replace(/[^0-9]/g, ''); // Оставляем только цифры
         }
     </script>
 

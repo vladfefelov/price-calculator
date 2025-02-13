@@ -1,77 +1,76 @@
-let activeTab = 0;
-let items = [];
+document.addEventListener("DOMContentLoaded", function () {
+    switchMode('manual'); // При загрузке ставим ручной ввод
+});
 
-function switchTab(index) {
-    activeTab = index;
-    document.querySelectorAll(".tab-btn").forEach((btn, i) => {
-        btn.classList.toggle("active", i === index);
-    });
-    document.querySelectorAll(".page").forEach((page, i) => {
-        page.classList.toggle("active", i === index);
-    });
-
-    if (index === 1) startCamera();
+function switchMode(mode) {
+    if (mode === 'manual') {
+        document.getElementById('manual-input').classList.add('active');
+        document.getElementById('auto-input').classList.remove('active');
+        document.getElementById('manual-input').classList.remove('hidden');
+        document.getElementById('auto-input').classList.add('hidden');
+    } else {
+        document.getElementById('manual-input').classList.remove('active');
+        document.getElementById('auto-input').classList.add('active');
+        document.getElementById('manual-input').classList.add('hidden');
+        document.getElementById('auto-input').classList.remove('hidden');
+        startCamera();
+    }
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`[onclick="switchMode('${mode}')"]`).classList.add('active');
 }
 
-function addItem() {
+function calculate() {
     let price = parseFloat(document.getElementById("price").value);
     let weight = parseFloat(document.getElementById("weight").value);
-
-    if (!price || !weight) return alert("Введите данные!");
-
-    let pricePerKg = (price / weight) * 1000;
-    items.push({ price, weight, pricePerKg });
-
-    updateTable();
+    if (!isNaN(price) && !isNaN(weight) && weight > 0) {
+        let pricePerKg = (price / weight) * 1000;
+        addRow(price, weight, pricePerKg.toFixed(2));
+    } else {
+        alert("Введите корректные данные!");
+    }
 }
 
 function resetTable() {
-    items = [];
-    updateTable();
+    document.getElementById("results").innerHTML = `
+        <tr>
+            <th>№</th>
+            <th>Цена (тг)</th>
+            <th>Вес (гр)</th>
+            <th>Цена за кг</th>
+        </tr>
+    `;
 }
 
-function updateTable() {
-    let tbody = document.getElementById("table-body");
-    tbody.innerHTML = "";
-
-    if (items.length < 2) {
-        items.forEach((item, index) => {
-            tbody.innerHTML += `<tr>
-                <td>${index + 1}</td>
-                <td>${item.price}</td>
-                <td>${item.weight}</td>
-                <td>${item.pricePerKg.toFixed(2)}</td>
-            </tr>`;
-        });
-        return;
-    }
-
-    let minPrice = Math.min(...items.map(i => i.pricePerKg));
-    let maxPrice = Math.max(...items.map(i => i.pricePerKg));
-
-    items.forEach((item, index) => {
-        let color = item.pricePerKg === minPrice ? "lightgreen" : item.pricePerKg === maxPrice ? "lightcoral" : "white";
-        tbody.innerHTML += `<tr style="background:${color}">
-            <td>${index + 1}</td>
-            <td>${item.price}</td>
-            <td>${item.weight}</td>
-            <td>${item.pricePerKg.toFixed(2)}</td>
-        </tr>`;
-    });
+function addRow(price, weight, pricePerKg) {
+    let table = document.getElementById("results");
+    let row = table.insertRow();
+    row.insertCell(0).innerText = table.rows.length - 1;
+    row.insertCell(1).innerText = price;
+    row.insertCell(2).innerText = weight;
+    row.insertCell(3).innerText = pricePerKg;
 }
 
-function startCamera() {
+async function startCamera() {
+    let stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
     let video = document.getElementById("camera");
-
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-        .then((stream) => {
-            video.srcObject = stream;
-        })
-        .catch((err) => {
-            console.error("Ошибка доступа к камере", err);
-        });
+    video.srcObject = stream;
 }
 
-function scan() {
-    alert("Здесь будет обработка изображения!");
+async function scanText() {
+    let resultText = document.getElementById("scan-result");
+    resultText.innerText = "Сканирую...";
+
+    setTimeout(() => {
+        let mockPrice = Math.floor(Math.random() * 1000) + 100;
+        let mockWeight = Math.floor(Math.random() * 900) + 100;
+        let detected = Math.random() > 0.2; // 80% шанс успешного распознавания
+
+        if (detected) {
+            let pricePerKg = (mockPrice / mockWeight) * 1000;
+            addRow(mockPrice, mockWeight, pricePerKg.toFixed(2));
+            resultText.innerText = `Цена: ${mockPrice} тг, Вес: ${mockWeight} г`;
+        } else {
+            resultText.innerText = "Текст не распознан!";
+        }
+    }, 2000);
 }

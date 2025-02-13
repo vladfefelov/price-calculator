@@ -3,110 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Калькулятор цены</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        .tab-container {
-            display: flex;
-            justify-content: space-around;
-            background: #f0f0f0;
-            padding: 10px;
-            border-radius: 10px;
-        }
-        .tab {
-            padding: 10px;
-            cursor: pointer;
-            flex: 1;
-        }
-        .tab.active {
-            background: #007AFF;
-            color: white;
-            font-weight: bold;
-            border-radius: 10px;
-        }
-        .content {
-            display: none;
-        }
-        .content.active {
-            display: block;
-        }
-        .input-container {
-            margin: 20px 0;
-        }
-        input {
-            width: 100px;
-            padding: 10px;
-            font-size: 16px;
-            text-align: center;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin: 5px;
-            border: none;
-            cursor: pointer;
-            color: white;
-        }
-        .calc-btn {
-            background: blue;
-        }
-        .reset-btn {
-            background: red;
-        }
-        #video-container {
-            position: relative;
-            width: 100%;
-            height: 300px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: black;
-        }
-        video {
-            width: 100%;
-            height: auto;
-        }
-        .scanner-frame {
-            position: absolute;
-            width: 80%;
-            height: 100px;
-            border: 2px solid red;
-            box-shadow: 0 0 10px red;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 10px;
-        }
-        .highlight-green {
-            background-color: #aaffaa;
-        }
-        .highlight-red {
-            background-color: #ffaaaa;
-        }
-    </style>
+    <title>Калькулятор цены за кг</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="tab-container">
-        <div class="tab active" onclick="switchTab(0)">Ручной ввод</div>
-        <div class="tab" onclick="switchTab(1)">Автоматический</div>
+    <div class="slider-container">
+        <button class="tab-btn active" onclick="switchTab(0)">Ручной ввод</button>
+        <button class="tab-btn" onclick="switchTab(1)">Автоматически</button>
     </div>
 
-    <div id="manual" class="content active">
-        <div class="input-container">
-            <input type="number" id="price" placeholder="Цена (тг)">
-            <input type="number" id="weight" placeholder="Вес (гр)">
+    <div class="page" id="manual-input">
+        <h2>Ручной ввод</h2>
+        <input type="number" id="price" placeholder="Цена (тг)">
+        <input type="number" id="weight" placeholder="Вес (гр)">
+        <button onclick="addItem()">Добавить</button>
+        <button class="reset" onclick="resetTable()">Сбросить</button>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Цена (тг)</th>
+                    <th>Вес (гр)</th>
+                    <th>Цена за кг</th>
+                </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+
+    <div class="page hidden" id="auto-input">
+        <h2>Автоматический ввод</h2>
+        <div id="video-container">
+            <video id="camera" autoplay playsinline></video>
+            <div class="scan-box"></div>
         </div>
-        <button class="calc-btn" onclick="calculate()">Посчитать</button>
-        <button class="reset-btn" onclick="resetTable()">Сбросить</button>
+        <button onclick="scan()">Сканировать</button>
+        <button class="reset" onclick="resetTable()">Сбросить</button>
 
         <table>
             <thead>
@@ -121,84 +55,6 @@
         </table>
     </div>
 
-    <div id="auto" class="content">
-        <div id="video-container">
-            <video id="camera" autoplay playsinline></video>
-            <div class="scanner-frame"></div>
-        </div>
-        <button class="calc-btn" onclick="scanPrice()">Сканировать</button>
-        <button class="reset-btn" onclick="resetTable()">Сбросить</button>
-    </div>
-
-    <script>
-        let currentTab = 0;
-        function switchTab(index) {
-            document.querySelectorAll('.tab').forEach((tab, i) => {
-                tab.classList.toggle('active', i === index);
-                document.querySelectorAll('.content')[i].classList.toggle('active', i === index);
-            });
-            currentTab = index;
-            if (index === 1) startCamera();
-        }
-
-        let itemCount = 0;
-        function calculate() {
-            let price = parseInt(document.getElementById("price").value, 10);
-            let weight = parseInt(document.getElementById("weight").value, 10);
-            if (!price || !weight) return;
-            let pricePerKg = Math.round((price / weight) * 1000);
-
-            let table = document.getElementById("table-body");
-            let row = table.insertRow();
-            row.insertCell(0).innerText = ++itemCount;
-            row.insertCell(1).innerText = price;
-            row.insertCell(2).innerText = weight;
-            row.insertCell(3).innerText = pricePerKg;
-
-            highlightBestWorst();
-        }
-
-        function resetTable() {
-            document.getElementById("table-body").innerHTML = "";
-            itemCount = 0;
-        }
-
-        function highlightBestWorst() {
-            let rows = [...document.querySelectorAll("#table-body tr")];
-            if (rows.length < 2) return;
-
-            let prices = rows.map(row => parseInt(row.cells[3].innerText, 10));
-            let min = Math.min(...prices);
-            let max = Math.max(...prices);
-
-            rows.forEach(row => {
-                let price = parseInt(row.cells[3].innerText, 10);
-                row.classList.remove("highlight-green", "highlight-red");
-                if (price === min) row.classList.add("highlight-green");
-                if (price === max) row.classList.add("highlight-red");
-            });
-        }
-
-        function startCamera() {
-            let constraints = {
-                video: {
-                    facingMode: "environment",
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                }
-            };
-            navigator.mediaDevices.getUserMedia(constraints)
-                .then(stream => {
-                    let video = document.getElementById("camera");
-                    video.srcObject = stream;
-                })
-                .catch(err => console.error("Ошибка камеры:", err));
-        }
-
-        function scanPrice() {
-            alert("Функция сканирования пока не реализована");
-        }
-    </script>
-
+    <script src="script.js"></script>
 </body>
 </html>

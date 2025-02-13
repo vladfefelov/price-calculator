@@ -9,22 +9,71 @@
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 20px;
+            background-color: #f8f9fa;
         }
-        input {
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+            background: white;
+        }
+        .input-group input {
             width: 80%;
             padding: 10px;
-            margin: 10px 0;
             font-size: 18px;
+            border: none;
+            outline: none;
+            text-align: right;
         }
-        button {
+        .input-group span {
+            width: 20%;
+            background: #e9ecef;
+            text-align: center;
+            padding: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            border-left: 1px solid #ccc;
+        }
+        .btn {
             padding: 10px 20px;
             font-size: 18px;
             cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             margin: 5px;
+            width: 90%;
+        }
+        .btn-blue {
+            background-color: #007bff;
+        }
+        .btn-blue:hover {
+            background-color: #0056b3;
+        }
+        .btn-red {
+            background-color: #dc3545;
+        }
+        .btn-red:hover {
+            background-color: #a71d2a;
         }
         table {
-            width: 90%;
-            margin: 20px auto;
+            width: 100%;
+            margin-top: 20px;
             border-collapse: collapse;
         }
         th, td {
@@ -38,26 +87,49 @@
         #resultTable {
             margin-top: 20px;
         }
+        .icon {
+            width: 20px;
+            height: 20px;
+        }
     </style>
 </head>
 <body>
-    <h2>Калькулятор цены за килограмм</h2>
-    <input type="number" id="price" placeholder="Цена в тенге">
-    <input type="number" id="weight" placeholder="Вес в граммах">
-    <button onclick="calculate()">Посчитать</button>
-    <button onclick="resetTable()">Сбросить</button>
 
-    <table id="resultTable">
-        <thead>
-            <tr>
-                <th>Товар №</th>
-                <th>Цена (тг)</th>
-                <th>Вес (г)</th>
-                <th>Цена за 1 кг (тг)</th>
-            </tr>
-        </thead>
-        <tbody id="resultBody"></tbody>
-    </table>
+    <div class="container">
+        <h2>Калькулятор цены за килограмм</h2>
+
+        <div class="input-group">
+            <input type="number" id="price" placeholder="Введите цену" oninput="validateInput(this)">
+            <span>тг</span>
+        </div>
+
+        <div class="input-group">
+            <input type="number" id="weight" placeholder="Введите вес" oninput="validateInput(this)">
+            <span>г</span>
+        </div>
+
+        <button class="btn btn-blue" onclick="calculate()">
+            <img class="icon" src="https://cdn-icons-png.flaticon.com/512/1053/1053209.png" alt="Калькулятор"> 
+            Посчитать
+        </button>
+
+        <button class="btn btn-red" onclick="resetTable()">
+            <img class="icon" src="https://cdn-icons-png.flaticon.com/512/1828/1828778.png" alt="Корзина">
+            Сбросить
+        </button>
+
+        <table id="resultTable">
+            <thead>
+                <tr>
+                    <th>Товар №</th>
+                    <th>Цена (тг)</th>
+                    <th>Вес (г)</th>
+                    <th>Цена за 1 кг (тг)</th>
+                </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+        </table>
+    </div>
 
     <script>
         let itemCount = 0;
@@ -88,6 +160,11 @@
             document.getElementById("resultBody").innerHTML = "";
             itemCount = 0;
         }
+
+        function validateInput(input) {
+            input.value = input.value.replace(/[^0-9]/g, ''); // Оставляем только цифры
+        }
     </script>
+
 </body>
 </html>

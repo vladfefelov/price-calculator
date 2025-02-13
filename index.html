@@ -4,178 +4,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Калькулятор цены за кг</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.0.2/tesseract.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-            background-color: #f8f9fa;
-        }
-        .container {
-            max-width: 400px;
-            margin: auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .input-group {
-            display: flex;
-            align-items: center;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            overflow: hidden;
-            background: white;
-        }
-        .input-group input {
-            width: 80%;
-            padding: 10px;
-            font-size: 18px;
-            border: none;
-            outline: none;
-            text-align: right;
-        }
-        .input-group span {
-            width: 20%;
-            background: #e9ecef;
-            text-align: center;
-            padding: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            border-left: 1px solid #ccc;
-        }
-        .btn {
-            padding: 10px 20px;
-            font-size: 18px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            margin: 5px;
-            width: 90%;
-        }
-        .btn-blue {
-            background-color: #007bff;
-        }
-        .btn-blue:hover {
-            background-color: #0056b3;
-        }
-        .btn-red {
-            background-color: #dc3545;
-        }
-        .btn-red:hover {
-            background-color: #a71d2a;
-        }
-        table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 10px;
-            text-align: center;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .cheapest {
-            background-color: #d4edda; /* Светло-зелёный */
-        }
-        .most-expensive {
-            background-color: #f8d7da; /* Светло-красный */
-        }
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { max-width: 400px; margin: auto; }
+        .hidden { display: none; }
+        input { width: 100%; padding: 10px; margin: 5px 0; font-size: 18px; }
+        button { padding: 10px; width: 100%; margin: 5px 0; font-size: 18px; }
+        .blue { background-color: blue; color: white; }
+        .red { background-color: red; color: white; }
+        table { width: 100%; margin-top: 10px; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 8px; text-align: center; }
+        .green { background-color: lightgreen; }
+        .red-bg { background-color: lightcoral; }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <h2>Калькулятор цены за килограмм</h2>
+        <h2>Калькулятор цены за кг</h2>
+        <label>
+            <input type="radio" name="mode" value="manual" checked onclick="toggleMode()"> Ручной ввод
+        </label>
+        <label>
+            <input type="radio" name="mode" value="auto" onclick="toggleMode()"> Автоматический
+        </label>
 
-        <div class="input-group">
-            <input type="number" id="price" placeholder="Цена в тенге" oninput="validateInput(this)">
-            <span>тг</span>
+        <div id="manual-input">
+            <input type="number" id="price" placeholder="Цена (тг)" inputmode="numeric">
+            <input type="number" id="weight" placeholder="Вес (гр)" inputmode="numeric">
+            <button class="blue" onclick="calculate()">Посчитать</button>
         </div>
 
-        <div class="input-group">
-            <input type="number" id="weight" placeholder="Вес в граммах" oninput="validateInput(this)">
-            <span>г</span>
+        <div id="auto-input" class="hidden">
+            <video id="camera" width="100%" autoplay></video>
+            <button class="blue" onclick="scanText()">Сканировать</button>
         </div>
 
-        <button class="btn btn-blue" onclick="calculate()">Посчитать</button>
-        <button class="btn btn-red" onclick="resetTable()">Сбросить</button>
-
-        <table id="resultTable">
+        <button class="red" onclick="resetTable()">Сбросить</button>
+        
+        <table>
             <thead>
                 <tr>
-                    <th>Товар №</th>
+                    <th>№</th>
                     <th>Цена (тг)</th>
-                    <th>Вес (г)</th>
-                    <th>Цена за 1 кг (тг)</th>
+                    <th>Вес (гр)</th>
+                    <th>Цена за кг</th>
                 </tr>
             </thead>
-            <tbody id="resultBody"></tbody>
+            <tbody id="result"></tbody>
         </table>
     </div>
 
     <script>
-        let itemCount = 0;
+        let counter = 1;
 
-        function calculate() {
-            let price = parseFloat(document.getElementById("price").value);
-            let weight = parseFloat(document.getElementById("weight").value);
+        function calculate(price, weight) {
+            if (!price || !weight) {
+                price = document.getElementById("price").value;
+                weight = document.getElementById("weight").value;
+            }
 
-            if (price > 0 && weight > 0) {
+            if (price && weight) {
                 let pricePerKg = Math.round((price / weight) * 1000);
-                itemCount++;
-
-                let table = document.getElementById("resultBody");
+                let table = document.getElementById("result");
                 let row = table.insertRow();
-                row.insertCell(0).innerText = itemCount;
-                row.insertCell(1).innerText = price + " тг";
-                row.insertCell(2).innerText = weight + " г";
-                row.insertCell(3).innerText = pricePerKg + " тг";
-                row.dataset.pricePerKg = pricePerKg; // Сохраняем цену в атрибуте
-
-                document.getElementById("price").value = "";
-                document.getElementById("weight").value = "";
-
-                updateHighlight();
-            } else {
-                alert("Введите корректные значения!");
+                row.insertCell(0).innerText = counter++;
+                row.insertCell(1).innerText = price;
+                row.insertCell(2).innerText = weight;
+                row.insertCell(3).innerText = pricePerKg;
+                highlightRows();
             }
         }
 
-        function updateHighlight() {
-            let rows = document.querySelectorAll("#resultBody tr");
-            if (rows.length < 2) return; // Должно быть хотя бы 2 товара
+        function resetTable() {
+            document.getElementById("result").innerHTML = "";
+            counter = 1;
+        }
 
-            let minPrice = Infinity, maxPrice = -Infinity;
-            let minRow = null, maxRow = null;
+        function highlightRows() {
+            let rows = document.getElementById("result").rows;
+            if (rows.length < 2) return;
 
-            rows.forEach(row => {
-                let pricePerKg = parseInt(row.dataset.pricePerKg);
-                if (pricePerKg < minPrice) {
-                    minPrice = pricePerKg;
-                    minRow = row;
-                }
-                if (pricePerKg > maxPrice) {
-                    maxPrice = pricePerKg;
-                    maxRow = row;
+            let prices = [];
+            for (let row of rows) {
+                prices.push(parseInt(row.cells[3].innerText));
+            }
+
+            let minPrice = Math.min(...prices);
+            let maxPrice = Math.max(...prices);
+
+            for (let row of rows) {
+                let price = parseInt(row.cells[3].innerText);
+                row.classList.remove("green", "red-bg");
+                if (price === minPrice) row.classList.add("green");
+                if (price === maxPrice) row.classList.add("red-bg");
+            }
+        }
+
+        function toggleMode() {
+            let manual = document.getElementById("manual-input");
+            let auto = document.getElementById("auto-input");
+            if (document.querySelector('input[name="mode"]:checked').value === "manual") {
+                manual.classList.remove("hidden");
+                auto.classList.add("hidden");
+                stopCamera();
+            } else {
+                manual.classList.add("hidden");
+                auto.classList.remove("hidden");
+                startCamera();
+            }
+        }
+
+        function startCamera() {
+            let video = document.getElementById("camera");
+            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                video.srcObject = stream;
+            }).catch(error => {
+                alert("Ошибка: не удалось получить доступ к камере.");
+            });
+        }
+
+        function stopCamera() {
+            let video = document.getElementById("camera");
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+        }
+
+        function scanText() {
+            let video = document.getElementById("camera");
+            let canvas = document.createElement("canvas");
+            let context = canvas.getContext("2d");
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            Tesseract.recognize(canvas, "eng", { logger: m => console.log(m) }).then(({ data: { text } }) => {
+                let numbers = text.match(/\d+/g);
+                if (numbers && numbers.length >= 2) {
+                    let price = numbers[0];
+                    let weight = numbers[1];
+                    calculate(price, weight);
+                } else {
+                    alert("Не удалось распознать цену и вес. Попробуйте снова.");
                 }
             });
-
-            rows.forEach(row => row.classList.remove("cheapest", "most-expensive"));
-            if (minRow) minRow.classList.add("cheapest");
-            if (maxRow) maxRow.classList.add("most-expensive");
-        }
-
-        function resetTable() {
-            document.getElementById("resultBody").innerHTML = "";
-            itemCount = 0;
         }
     </script>
-
 </body>
 </html>

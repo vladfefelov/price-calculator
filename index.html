@@ -80,8 +80,11 @@
         th {
             background-color: #f2f2f2;
         }
-        #resultTable {
-            margin-top: 20px;
+        .cheapest {
+            background-color: #d4edda; /* Светло-зелёный */
+        }
+        .most-expensive {
+            background-color: #f8d7da; /* Светло-красный */
         }
     </style>
 </head>
@@ -133,12 +136,39 @@
                 row.insertCell(1).innerText = price + " тг";
                 row.insertCell(2).innerText = weight + " г";
                 row.insertCell(3).innerText = pricePerKg + " тг";
+                row.dataset.pricePerKg = pricePerKg; // Сохраняем цену в атрибуте
 
                 document.getElementById("price").value = "";
                 document.getElementById("weight").value = "";
+
+                updateHighlight();
             } else {
                 alert("Введите корректные значения!");
             }
+        }
+
+        function updateHighlight() {
+            let rows = document.querySelectorAll("#resultBody tr");
+            if (rows.length < 2) return; // Должно быть хотя бы 2 товара
+
+            let minPrice = Infinity, maxPrice = -Infinity;
+            let minRow = null, maxRow = null;
+
+            rows.forEach(row => {
+                let pricePerKg = parseInt(row.dataset.pricePerKg);
+                if (pricePerKg < minPrice) {
+                    minPrice = pricePerKg;
+                    minRow = row;
+                }
+                if (pricePerKg > maxPrice) {
+                    maxPrice = pricePerKg;
+                    maxRow = row;
+                }
+            });
+
+            rows.forEach(row => row.classList.remove("cheapest", "most-expensive"));
+            if (minRow) minRow.classList.add("cheapest");
+            if (maxRow) maxRow.classList.add("most-expensive");
         }
 
         function resetTable() {

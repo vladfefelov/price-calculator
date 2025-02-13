@@ -4,56 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Калькулятор цены за кг</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
     <div class="slider-container">
-        <button class="tab-btn active" onclick="switchTab(0)">Ручной ввод</button>
-        <button class="tab-btn" onclick="switchTab(1)">Автоматически</button>
+        <button class="tab-btn active" onclick="switchMode('manual')">Ручной ввод</button>
+        <button class="tab-btn" onclick="switchMode('auto')">Автоматический ввод</button>
     </div>
 
-    <div class="page" id="manual-input">
+    <div id="manual-input" class="page active">
         <h2>Ручной ввод</h2>
-        <input type="number" id="price" placeholder="Цена (тг)">
-        <input type="number" id="weight" placeholder="Вес (гр)">
-        <button onclick="addItem()">Добавить</button>
+        <input type="number" id="price" placeholder="Цена (тенге)">
+        <input type="number" id="weight" placeholder="Вес (граммы)">
+        <button onclick="calculate()">Рассчитать</button>
         <button class="reset" onclick="resetTable()">Сбросить</button>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>№</th>
-                    <th>Цена (тг)</th>
-                    <th>Вес (гр)</th>
-                    <th>Цена за кг</th>
-                </tr>
-            </thead>
-            <tbody id="table-body"></tbody>
-        </table>
     </div>
 
-    <div class="page hidden" id="auto-input">
+    <div id="auto-input" class="page hidden">
         <h2>Автоматический ввод</h2>
         <div id="video-container">
             <video id="camera" autoplay playsinline></video>
             <div class="scan-box"></div>
         </div>
-        <button onclick="scan()">Сканировать</button>
+        <button onclick="scanText()">Сканировать</button>
         <button class="reset" onclick="resetTable()">Сбросить</button>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>№</th>
-                    <th>Цена (тг)</th>
-                    <th>Вес (гр)</th>
-                    <th>Цена за кг</th>
-                </tr>
-            </thead>
-            <tbody id="table-body"></tbody>
-        </table>
+        <p id="scan-result"></p>
     </div>
+
+    <table id="results">
+        <tr>
+            <th>№</th>
+            <th>Цена (тг)</th>
+            <th>Вес (гр)</th>
+            <th>Цена за кг</th>
+        </tr>
+    </table>
 
     <script src="script.js"></script>
 </body>
